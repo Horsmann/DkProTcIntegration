@@ -11,13 +11,13 @@ import org.junit.Test;
 
 import de.unidue.ltl.integration.ContextMemoryReport;
 
-public class RunPosTaggingDemo
+public class RunPosTaggingDemoTest
 {
     @Test
     public void run()
         throws Exception
     {
-        PosTagging.main(null);
+        new PosTagging().run();
         ContextMemoryReport.key = PosTagging.class.getName();
 
         Id2Outcome o = new Id2Outcome(ContextMemoryReport.id2outcome, Constants.LM_SINGLE_LABEL);

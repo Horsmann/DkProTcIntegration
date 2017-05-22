@@ -33,7 +33,10 @@ public class PosTagging
     public static void main(String[] args)
         throws Exception
     {
-
+        new PosTagging().run();
+    }
+    
+    public void run() throws Exception{
         // This is used to ensure that the required DKPRO_HOME environment variable is set.
         // Ensures that people can run the experiments even if they haven't read the setup
         // instructions first :)
