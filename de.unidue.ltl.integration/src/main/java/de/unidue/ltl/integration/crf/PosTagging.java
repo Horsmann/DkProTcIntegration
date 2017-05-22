@@ -3,6 +3,7 @@ package de.unidue.ltl.integration.crf;
 import static org.apache.uima.fit.factory.AnalysisEngineFactory.createEngineDescription;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,7 +41,7 @@ public class PosTagging
 
         @SuppressWarnings("unchecked")
         ParameterSpace pSpace = getParameterSpace(Constants.FM_SEQUENCE, Constants.LM_SINGLE_LABEL,
-                Dimension.create(Constants.DIM_CLASSIFICATION_ARGS, new ArrayList<>()), null);
+                Dimension.create(Constants.DIM_CLASSIFICATION_ARGS, Arrays.asList(CRFSuiteAdapter.ALGORITHM_AVERAGED_PERCEPTRON)), null);
 
         PosTagging experiment = new PosTagging();
         experiment.runTrainTest(pSpace);
@@ -68,7 +69,7 @@ public class PosTagging
                         TcFeatureFactory.create(LuceneCharacterNGram.class,
                                 LuceneCharacterNGram.PARAM_NGRAM_MIN_N, 1,
                                 LuceneCharacterNGram.PARAM_NGRAM_MAX_N, 4,
-                                LuceneCharacterNGram.PARAM_NGRAM_USE_TOP_K, 1000)));
+                                LuceneCharacterNGram.PARAM_NGRAM_USE_TOP_K, 750)));
 
         ParameterSpace pSpace = new ParameterSpace(Dimension.createBundle("readers", dimReaders),
                 Dimension.create(Constants.DIM_LEARNING_MODE, learningMode),
