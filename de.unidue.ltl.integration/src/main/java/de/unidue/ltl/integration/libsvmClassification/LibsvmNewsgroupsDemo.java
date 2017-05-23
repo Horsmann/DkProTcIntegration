@@ -16,17 +16,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see http://www.gnu.org/licenses/.
  */
-package de.unidue.ltl.integration.libsvmRegression;
+package de.unidue.ltl.integration.libsvmClassification;
 
-import static org.apache.uima.fit.factory.AnalysisEngineFactory.createEngineDescription;
+import static java.util.Arrays.asList;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.uima.analysis_engine.AnalysisEngineDescription;
 import org.apache.uima.collection.CollectionReaderDescription;
+import org.apache.uima.fit.factory.AnalysisEngineFactory;
 import org.apache.uima.fit.factory.CollectionReaderFactory;
 import org.apache.uima.resource.ResourceInitializationException;
 import org.dkpro.lab.Lab;
@@ -36,41 +36,52 @@ import org.dkpro.lab.task.ParameterSpace;
 import org.dkpro.tc.api.features.TcFeatureFactory;
 import org.dkpro.tc.api.features.TcFeatureSet;
 import org.dkpro.tc.core.Constants;
-import org.dkpro.tc.features.length.NrOfSentences;
 import org.dkpro.tc.features.length.NrOfTokens;
 import org.dkpro.tc.features.length.NrOfTokensPerSentence;
+import org.dkpro.tc.features.ngram.LuceneNGram;
 import org.dkpro.tc.ml.ExperimentTrainTest;
 import org.dkpro.tc.ml.libsvm.LibsvmAdapter;
 import org.dkpro.tc.ml.report.BatchTrainTestReport;
 
 import de.tudarmstadt.ukp.dkpro.core.tokit.BreakIteratorSegmenter;
 import de.unidue.ltl.integration.ContextMemoryReport;
-import de.unidue.ltl.integration.wekaRegression.EssayScoreReader;
+import de.unidue.ltl.integration.wekaClassification.TwentyNewsgroupsCorpusReader;
 
-public class LibsvmRegressionDemo
+/**
+ * This a pure Java-based experiment setup of the TwentyNewsgroupsExperiment.
+ * 
+ * Defining the parameters directly in this class makes on-the-fly changes more difficult when the
+ * experiment is run on a server.
+ * 
+ * For these cases, the self-sufficient Groovy versions are more suitable, since their source code
+ * can be changed and then executed without pre-compilation.
+ */
+public class LibsvmNewsgroupsDemo
     implements Constants
 {
     public static final String LANGUAGE_CODE = "en";
 
-    public static final String corpusFilePathTrain = "src/main/resources/data/twentynewsgroups/bydate-train";
-    public static final String corpusFilePathTest = "src/main/resources/data/twentynewsgroups/bydate-test";
+    public static final String corpusFilePathTrain = "src/main/resources/20newsgroup/train";
+    public static final String corpusFilePathTest = "src/main/resources/20newsgroup/test";
 
     public static void main(String[] args)
         throws Exception
     {
-        new LibsvmRegressionDemo().run();
+        new LibsvmNewsgroupsDemo().run();
     }
 
     public void run()
         throws Exception
     {
-        System.setProperty("DKPRO_HOME", "target/" + LibsvmRegressionDemo.class.getSimpleName());
+        System.setProperty("DKPRO_HOME", "target/" + LibsvmNewsgroupsDemo.class.getSimpleName());
         ParameterSpace pSpace = getParameterSpace();
 
-        LibsvmRegressionDemo experiment = new LibsvmRegressionDemo();
+        LibsvmNewsgroupsDemo experiment = new LibsvmNewsgroupsDemo();
+        // experiment.runCrossValidation(pSpace);
         experiment.runTrainTest(pSpace);
     }
 
+    @SuppressWarnings("unchecked")
     public static ParameterSpace getParameterSpace()
         throws ResourceInitializationException
     {
@@ -79,39 +90,42 @@ public class LibsvmRegressionDemo
         Map<String, Object> dimReaders = new HashMap<String, Object>();
 
         CollectionReaderDescription readerTrain = CollectionReaderFactory.createReaderDescription(
-                EssayScoreReader.class, EssayScoreReader.PARAM_SOURCE_LOCATION,
-                "src/main/resources/essays/train.txt", EssayScoreReader.PARAM_LANGUAGE, "en");
+                TwentyNewsgroupsCorpusReader.class,
+                TwentyNewsgroupsCorpusReader.PARAM_SOURCE_LOCATION, corpusFilePathTrain,
+                TwentyNewsgroupsCorpusReader.PARAM_LANGUAGE, LANGUAGE_CODE,
+                TwentyNewsgroupsCorpusReader.PARAM_PATTERNS, "/**/*.txt");
         dimReaders.put(DIM_READER_TRAIN, readerTrain);
 
         CollectionReaderDescription readerTest = CollectionReaderFactory.createReaderDescription(
-                EssayScoreReader.class, EssayScoreReader.PARAM_SOURCE_LOCATION,
-                "src/main/resources/essays/test.txt", EssayScoreReader.PARAM_LANGUAGE, "en");
+                TwentyNewsgroupsCorpusReader.class,
+                TwentyNewsgroupsCorpusReader.PARAM_SOURCE_LOCATION, corpusFilePathTest,
+                TwentyNewsgroupsCorpusReader.PARAM_LANGUAGE, LANGUAGE_CODE,
+                TwentyNewsgroupsCorpusReader.PARAM_PATTERNS, "/**/*.txt");
         dimReaders.put(DIM_READER_TEST, readerTest);
 
-        @SuppressWarnings("unchecked")
-        Dimension<List<String>> dimClassificationArgs = Dimension.create(DIM_CLASSIFICATION_ARGS,
-                Arrays.asList(new String[] { "-s", LibsvmAdapter.PARAM_SVM_TYPE_NU_SVR_REGRESSION,
-                        "-c", "100" }));
+        Dimension<List<String>> dimClassificationArgs = Dimension
+                .create(Constants.DIM_CLASSIFICATION_ARGS, asList(new String[] { "-s",
+                        LibsvmAdapter.PARAM_SVM_TYPE_C_SVC_MULTI_CLASS, "-c", "10000", }));
 
-        Dimension<TcFeatureSet> dimFeatureSets = Dimension.create(DIM_FEATURE_SET,
-                new TcFeatureSet(TcFeatureFactory.create(NrOfTokens.class),
-                        TcFeatureFactory.create(NrOfSentences.class),
-                        TcFeatureFactory.create(NrOfTokensPerSentence.class)));
+        Dimension<TcFeatureSet> dimFeatureSets = Dimension.create(DIM_FEATURE_SET, new TcFeatureSet(
+                TcFeatureFactory.create(NrOfTokensPerSentence.class),
+                TcFeatureFactory.create(NrOfTokens.class),
+                TcFeatureFactory.create(LuceneNGram.class, LuceneNGram.PARAM_NGRAM_USE_TOP_K, 2500,
+                        LuceneNGram.PARAM_NGRAM_MIN_N, 1, LuceneNGram.PARAM_NGRAM_MAX_N, 3)));
 
         ParameterSpace pSpace = new ParameterSpace(Dimension.createBundle("readers", dimReaders),
-                Dimension.create(DIM_LEARNING_MODE, LM_REGRESSION),
+                Dimension.create(DIM_LEARNING_MODE, LM_SINGLE_LABEL),
                 Dimension.create(DIM_FEATURE_MODE, FM_DOCUMENT), dimFeatureSets,
                 dimClassificationArgs);
 
         return pSpace;
     }
 
-    // ##### TRAIN-TEST #####
     protected void runTrainTest(ParameterSpace pSpace)
         throws Exception
     {
 
-        ExperimentTrainTest batch = new ExperimentTrainTest("LibsvmRegression",
+        ExperimentTrainTest batch = new ExperimentTrainTest("LibsvmTwentyNewsgroupsTrainTest",
                 LibsvmAdapter.class);
         batch.setPreprocessing(getPreprocessing());
         batch.setParameterSpace(pSpace);
@@ -126,6 +140,7 @@ public class LibsvmRegressionDemo
     protected AnalysisEngineDescription getPreprocessing()
         throws ResourceInitializationException
     {
-        return createEngineDescription(BreakIteratorSegmenter.class);
+
+        return AnalysisEngineFactory.createEngineDescription(BreakIteratorSegmenter.class);
     }
 }
