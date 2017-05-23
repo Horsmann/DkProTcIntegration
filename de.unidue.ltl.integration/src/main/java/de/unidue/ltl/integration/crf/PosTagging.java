@@ -2,7 +2,6 @@ package de.unidue.ltl.integration.crf;
 
 import static org.apache.uima.fit.factory.AnalysisEngineFactory.createEngineDescription;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -35,16 +34,22 @@ public class PosTagging
     {
         new PosTagging().run();
     }
-    
-    public void run() throws Exception{
+
+    public void run()
+        throws Exception
+    {
         // This is used to ensure that the required DKPRO_HOME environment variable is set.
         // Ensures that people can run the experiments even if they haven't read the setup
         // instructions first :)
-        System.setProperty("DKPRO_HOME", "target/"+PosTagging.class.getSimpleName());
+        System.setProperty("DKPRO_HOME", "target/" + PosTagging.class.getSimpleName());
 
         @SuppressWarnings("unchecked")
         ParameterSpace pSpace = getParameterSpace(Constants.FM_SEQUENCE, Constants.LM_SINGLE_LABEL,
-                Dimension.create(Constants.DIM_CLASSIFICATION_ARGS, Arrays.asList(CRFSuiteAdapter.ALGORITHM_AVERAGED_PERCEPTRON)), null);
+                Dimension.create(Constants.DIM_CLASSIFICATION_ARGS, Arrays.asList(
+                        CRFSuiteAdapter.ALGORITHM_ADAPTIVE_REGULARIZATION_OF_WEIGHT_VECTOR
+//                        , "-p", "max_iterations=50"
+                        )),
+                null);
 
         PosTagging experiment = new PosTagging();
         experiment.runTrainTest(pSpace);
@@ -71,8 +76,21 @@ public class PosTagging
                 new TcFeatureSet(TcFeatureFactory.create(NrOfChars.class),
                         TcFeatureFactory.create(LuceneCharacterNGram.class,
                                 LuceneCharacterNGram.PARAM_NGRAM_MIN_N, 1,
+                                LuceneCharacterNGram.PARAM_NGRAM_MAX_N, 1,
+                                LuceneCharacterNGram.PARAM_NGRAM_USE_TOP_K, 50),
+                        TcFeatureFactory.create(LuceneCharacterNGram.class,
+                                LuceneCharacterNGram.PARAM_NGRAM_MIN_N, 2,
+                                LuceneCharacterNGram.PARAM_NGRAM_MAX_N, 2,
+                                LuceneCharacterNGram.PARAM_NGRAM_USE_TOP_K, 750),
+                        TcFeatureFactory.create(LuceneCharacterNGram.class,
+                                LuceneCharacterNGram.PARAM_NGRAM_MIN_N, 3,
+                                LuceneCharacterNGram.PARAM_NGRAM_MAX_N, 3,
+                                LuceneCharacterNGram.PARAM_NGRAM_USE_TOP_K, 750),
+                        TcFeatureFactory.create(LuceneCharacterNGram.class,
+                                LuceneCharacterNGram.PARAM_NGRAM_MIN_N, 4,
                                 LuceneCharacterNGram.PARAM_NGRAM_MAX_N, 4,
-                                LuceneCharacterNGram.PARAM_NGRAM_USE_TOP_K, 750)));
+                                LuceneCharacterNGram.PARAM_NGRAM_USE_TOP_K, 750)
+                        ));
 
         ParameterSpace pSpace = new ParameterSpace(Dimension.createBundle("readers", dimReaders),
                 Dimension.create(Constants.DIM_LEARNING_MODE, learningMode),
