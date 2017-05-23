@@ -26,5 +26,6 @@ public class RunPosTaggingDemoTest
         Double result = createEvaluator.calculateEvaluationMeasures()
                 .get(Accuracy.class.getSimpleName());
         assertTrue(result > 0.90);
+        assertEquals(0.95, result, 0.01);
     }
 }
