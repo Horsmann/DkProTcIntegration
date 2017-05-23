@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see http://www.gnu.org/licenses/.
  */
-package de.unidue.ltl.integration.weka;
+package de.unidue.ltl.integration.wekaClassification;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -39,14 +39,11 @@ import org.dkpro.tc.features.length.NrOfTokens;
 import org.dkpro.tc.features.length.NrOfTokensPerSentence;
 import org.dkpro.tc.features.ngram.LuceneNGram;
 import org.dkpro.tc.ml.ExperimentTrainTest;
-import org.dkpro.tc.ml.report.BatchRuntimeReport;
 import org.dkpro.tc.ml.report.BatchTrainTestReport;
 import org.dkpro.tc.ml.weka.WekaClassificationAdapter;
 
 import de.tudarmstadt.ukp.dkpro.core.tokit.BreakIteratorSegmenter;
 import de.unidue.ltl.integration.ContextMemoryReport;
-import de.unidue.ltl.integration.crf.PosTagging;
-import weka.classifiers.bayes.NaiveBayes;
 import weka.classifiers.functions.SMO;
 import weka.classifiers.functions.supportVector.PolyKernel;
 
@@ -70,9 +67,14 @@ public class WekaTwentyNewsgroupsDemo
     public static void main(String[] args)
         throws Exception
     {
+        new WekaTwentyNewsgroupsDemo().run();
+    }
 
-        System.setProperty("DKPRO_HOME", "target/" + PosTagging.class.getSimpleName());
-
+    public void run()
+        throws Exception
+    {
+        System.setProperty("DKPRO_HOME",
+                "target/" + WekaTwentyNewsgroupsDemo.class.getSimpleName());
         ParameterSpace pSpace = getParameterSpace();
 
         WekaTwentyNewsgroupsDemo experiment = new WekaTwentyNewsgroupsDemo();
@@ -92,14 +94,14 @@ public class WekaTwentyNewsgroupsDemo
                 TwentyNewsgroupsCorpusReader.class,
                 TwentyNewsgroupsCorpusReader.PARAM_SOURCE_LOCATION, corpusFilePathTrain,
                 TwentyNewsgroupsCorpusReader.PARAM_LANGUAGE, LANGUAGE_CODE,
-                TwentyNewsgroupsCorpusReader.PARAM_PATTERNS, "*.txt");
+                TwentyNewsgroupsCorpusReader.PARAM_PATTERNS, "/**/*.txt");
         dimReaders.put(DIM_READER_TRAIN, readerTrain);
 
         CollectionReaderDescription readerTest = CollectionReaderFactory.createReaderDescription(
                 TwentyNewsgroupsCorpusReader.class,
                 TwentyNewsgroupsCorpusReader.PARAM_SOURCE_LOCATION, corpusFilePathTest,
                 TwentyNewsgroupsCorpusReader.PARAM_LANGUAGE, LANGUAGE_CODE,
-                TwentyNewsgroupsCorpusReader.PARAM_PATTERNS, "*.txt");
+                TwentyNewsgroupsCorpusReader.PARAM_PATTERNS, "/**/*.txt");
         dimReaders.put(DIM_READER_TEST, readerTest);
 
         Dimension<List<String>> dimClassificationArgs = Dimension.create(DIM_CLASSIFICATION_ARGS,
@@ -109,7 +111,7 @@ public class WekaTwentyNewsgroupsDemo
         Dimension<TcFeatureSet> dimFeatureSets = Dimension.create(DIM_FEATURE_SET, new TcFeatureSet(
                 TcFeatureFactory.create(NrOfTokensPerSentence.class),
                 TcFeatureFactory.create(NrOfTokens.class),
-                TcFeatureFactory.create(LuceneNGram.class, LuceneNGram.PARAM_NGRAM_USE_TOP_K, 1000,
+                TcFeatureFactory.create(LuceneNGram.class, LuceneNGram.PARAM_NGRAM_USE_TOP_K, 1500,
                         LuceneNGram.PARAM_NGRAM_MIN_N, 1, LuceneNGram.PARAM_NGRAM_MAX_N, 3)));
 
         ParameterSpace pSpace = new ParameterSpace(Dimension.createBundle("readers", dimReaders),

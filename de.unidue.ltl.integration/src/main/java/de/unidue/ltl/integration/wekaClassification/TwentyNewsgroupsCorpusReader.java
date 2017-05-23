@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see http://www.gnu.org/licenses/.
  */
-package de.unidue.ltl.integration.weka;
+package de.unidue.ltl.integration.wekaClassification;
 
 import java.io.File;
 import java.net.URI;
