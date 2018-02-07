@@ -1,15 +1,13 @@
 package de.unidue.ltl.integration.crf;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
-import org.dkpro.tc.core.Constants;
-import org.dkpro.tc.evaluation.Id2Outcome;
-import org.dkpro.tc.evaluation.evaluator.EvaluatorBase;
-import org.dkpro.tc.evaluation.evaluator.EvaluatorFactory;
-import org.dkpro.tc.evaluation.measures.label.Accuracy;
 import org.dkpro.tc.ml.crfsuite.task.CRFSuiteTestTask;
+import org.dkpro.tc.ml.report.util.Tc2LtlabEvalConverter;
 import org.junit.Test;
 
+import de.unidue.ltl.evaluation.core.EvaluationData;
+import de.unidue.ltl.evaluation.measures.Accuracy;
 import de.unidue.ltl.integration.ContextMemoryReport;
 
 public class RunPosTaggingDemoTest
@@ -20,11 +18,10 @@ public class RunPosTaggingDemoTest
     {
         ContextMemoryReport.key = CRFSuiteTestTask.class.getName();
         new PosTagging().run();
-
-        Id2Outcome o = new Id2Outcome(ContextMemoryReport.id2outcome, Constants.LM_SINGLE_LABEL);
-        EvaluatorBase createEvaluator = EvaluatorFactory.createEvaluator(o, true, false);
-        Double result = createEvaluator.calculateEvaluationMeasures()
-                .get(Accuracy.class.getSimpleName());
-        assertEquals(0.92177, result, 0.01);
+        
+        EvaluationData<String> d = Tc2LtlabEvalConverter.convertSingleLabelModeId2Outcome(ContextMemoryReport.id2outcome);
+        Accuracy<String> a = new Accuracy<>(d);
+                
+        assertEquals(0.92177, a.getResult(), 0.01);
     }
 }

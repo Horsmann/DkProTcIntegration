@@ -22,13 +22,10 @@ import org.dkpro.tc.features.length.NrOfTokens;
 import org.dkpro.tc.features.length.NrOfTokensPerSentence;
 import org.dkpro.tc.ml.ExperimentTrainTest;
 import org.dkpro.tc.ml.liblinear.LiblinearAdapter;
-import org.dkpro.tc.ml.liblinear.LiblinearTestTask;
-import org.dkpro.tc.ml.weka.WekaRegressionAdapter;
 
 import de.tudarmstadt.ukp.dkpro.core.tokit.BreakIteratorSegmenter;
 import de.unidue.ltl.integration.ContextMemoryReport;
 import de.unidue.ltl.integration.wekaRegression.EssayScoreReader;
-import weka.classifiers.functions.LinearRegression;
 
 public class LiblinearRegressionDemo
     implements Constants
@@ -70,8 +67,8 @@ public class LiblinearRegressionDemo
                 "src/main/resources/essays/test.txt", EssayScoreReader.PARAM_LANGUAGE, "en");
         dimReaders.put(DIM_READER_TEST, readerTest);
 
-        Dimension<List<String>> dimClassificationArgs = Dimension.create(DIM_CLASSIFICATION_ARGS,
-                Arrays.asList(new String[] { "-s", "6" }));
+        Dimension<List<Object>> dimClassificationArgs = Dimension.create(DIM_CLASSIFICATION_ARGS,
+                Arrays.asList(new Object[] { new LiblinearAdapter(), "-s", "6" }));
 
         Dimension<TcFeatureSet> dimFeatureSets = Dimension.create(DIM_FEATURE_SET,
                 new TcFeatureSet(TcFeatureFactory.create(NrOfTokens.class),
@@ -90,8 +87,7 @@ public class LiblinearRegressionDemo
     protected void runTrainTest(ParameterSpace pSpace)
         throws Exception
     {
-        ExperimentTrainTest batch = new ExperimentTrainTest("LiblinearRegressionDemo",
-                LiblinearAdapter.class);
+        ExperimentTrainTest batch = new ExperimentTrainTest("LiblinearRegressionDemo");
         batch.setPreprocessing(getPreprocessing());
         batch.setParameterSpace(pSpace);
         batch.addReport(ContextMemoryReport.class);

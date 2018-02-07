@@ -45,7 +45,7 @@ public class PosTagging
 
         @SuppressWarnings("unchecked")
         ParameterSpace pSpace = getParameterSpace(Constants.FM_SEQUENCE, Constants.LM_SINGLE_LABEL,
-                Dimension.create(Constants.DIM_CLASSIFICATION_ARGS, Arrays.asList(
+                Dimension.create(Constants.DIM_CLASSIFICATION_ARGS, Arrays.asList( new CRFSuiteAdapter(), 
                         CRFSuiteAdapter.ALGORITHM_ADAPTIVE_REGULARIZATION_OF_WEIGHT_VECTOR
 //                        , "-p", "max_iterations=50"
                         )),
@@ -56,7 +56,7 @@ public class PosTagging
     }
 
     public static ParameterSpace getParameterSpace(String featureMode, String learningMode,
-            Dimension<List<String>> dimClassificationArgs, Dimension<List<String>> dimFilters)
+            Dimension<List<Object>> dimClassificationArgs, Dimension<List<String>> dimFilters)
                 throws ResourceInitializationException
     {
         // configure training and test data reader dimension
@@ -109,8 +109,7 @@ public class PosTagging
     public void runTrainTest(ParameterSpace pSpace)
         throws Exception
     {
-        ExperimentTrainTest batch = new ExperimentTrainTest("BrownTrainTest",
-                CRFSuiteAdapter.class);
+        ExperimentTrainTest batch = new ExperimentTrainTest("BrownTrainTest");
         batch.setParameterSpace(pSpace);
         batch.setPreprocessing(getPreprocessing());
         batch.setExecutionPolicy(ExecutionPolicy.RUN_AGAIN);

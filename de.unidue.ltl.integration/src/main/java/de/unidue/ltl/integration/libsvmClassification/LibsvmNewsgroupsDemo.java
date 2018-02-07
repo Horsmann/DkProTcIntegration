@@ -103,8 +103,8 @@ public class LibsvmNewsgroupsDemo
                 TwentyNewsgroupsCorpusReader.PARAM_PATTERNS, "/**/*.txt");
         dimReaders.put(DIM_READER_TEST, readerTest);
 
-        Dimension<List<String>> dimClassificationArgs = Dimension
-                .create(Constants.DIM_CLASSIFICATION_ARGS, asList(new String[] { "-s",
+        Dimension<List<Object>> dimClassificationArgs = Dimension
+                .create(Constants.DIM_CLASSIFICATION_ARGS, asList(new Object[] { new LibsvmAdapter(), "-s",
                         LibsvmAdapter.PARAM_SVM_TYPE_C_SVC_MULTI_CLASS, "-c", "10000", }));
 
         Dimension<TcFeatureSet> dimFeatureSets = Dimension.create(DIM_FEATURE_SET, new TcFeatureSet(
@@ -125,8 +125,7 @@ public class LibsvmNewsgroupsDemo
         throws Exception
     {
 
-        ExperimentTrainTest batch = new ExperimentTrainTest("LibsvmTwentyNewsgroupsTrainTest",
-                LibsvmAdapter.class);
+        ExperimentTrainTest batch = new ExperimentTrainTest("LibsvmTwentyNewsgroupsTrainTest");
         batch.setPreprocessing(getPreprocessing());
         batch.setParameterSpace(pSpace);
         batch.setExecutionPolicy(ExecutionPolicy.RUN_AGAIN);

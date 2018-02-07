@@ -103,8 +103,8 @@ public class LiblinearNewsgroupsDemo
                 TwentyNewsgroupsCorpusReader.PARAM_PATTERNS, "/**/*.txt");
         dimReaders.put(DIM_READER_TEST, readerTest);
 
-        Dimension<List<String>> dimClassificationArgs = Dimension.create(
-                Constants.DIM_CLASSIFICATION_ARGS, asList(new String[] { "-s", "4", "-c", "100" }));
+        Dimension<List<Object>> dimClassificationArgs = Dimension.create(
+                Constants.DIM_CLASSIFICATION_ARGS, asList(new Object[] { new LiblinearAdapter(), "-s", "4", "-c", "100" }));
 
         Dimension<TcFeatureSet> dimFeatureSets = Dimension.create(DIM_FEATURE_SET, new TcFeatureSet(
                 TcFeatureFactory.create(NrOfTokensPerSentence.class),
@@ -124,8 +124,7 @@ public class LiblinearNewsgroupsDemo
         throws Exception
     {
 
-        ExperimentTrainTest batch = new ExperimentTrainTest("LiblinearTwentyNewsgroupsTrainTest",
-                LiblinearAdapter.class);
+        ExperimentTrainTest batch = new ExperimentTrainTest("LiblinearTwentyNewsgroupsTrainTest");
         batch.setPreprocessing(getPreprocessing());
         batch.setParameterSpace(pSpace);
         batch.setExecutionPolicy(ExecutionPolicy.RUN_AGAIN);
