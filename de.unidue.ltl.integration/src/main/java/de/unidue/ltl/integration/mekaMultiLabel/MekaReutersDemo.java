@@ -41,19 +41,14 @@ import org.dkpro.tc.features.ngram.LuceneNGram;
 import org.dkpro.tc.features.ngram.LucenePOSNGram;
 import org.dkpro.tc.ml.ExperimentTrainTest;
 import org.dkpro.tc.ml.report.BatchTrainTestReport;
-import org.dkpro.tc.ml.weka.MekaClassificationAdapter;
+import org.dkpro.tc.ml.weka.MekaAdapter;
 
 import de.tudarmstadt.ukp.dkpro.core.io.text.TextReader;
 import de.tudarmstadt.ukp.dkpro.core.opennlp.OpenNlpPosTagger;
 import de.tudarmstadt.ukp.dkpro.core.tokit.BreakIteratorSegmenter;
 import de.unidue.ltl.integration.ContextMemoryReport;
-import meka.classifiers.multilabel.BCC;
 import meka.classifiers.multilabel.BPNN;
-import meka.classifiers.multilabel.PCC;
-import meka.classifiers.multilabel.PMCC;
-import meka.classifiers.multilabel.incremental.PSUpdateable;
 import weka.attributeSelection.InfoGainAttributeEval;
-import weka.classifiers.meta.MultiClassClassifier;
 
 public class MekaReutersDemo implements Constants {
 
@@ -87,8 +82,8 @@ public class MekaReutersDemo implements Constants {
 				TextReader.PARAM_PATTERNS, TextReader.INCLUDE_PREFIX + "*.txt");
 		dimReaders.put(DIM_READER_TEST, readerTest);
 
-		Dimension<List<String>> dimClassificationArgs = Dimension.create(DIM_CLASSIFICATION_ARGS,
-				Arrays.asList(new String[] { BPNN.class.getName() }));
+		Dimension<List<Object>> dimClassificationArgs = Dimension.create(DIM_CLASSIFICATION_ARGS,
+				Arrays.asList(new Object[] { new MekaAdapter(), BPNN.class.getName() }));
 
 		Dimension<TcFeatureSet> dimFeatureSets = Dimension.create(DIM_FEATURE_SET,
 				new TcFeatureSet(TcFeatureFactory.create(NrOfTokens.class),
@@ -116,8 +111,7 @@ public class MekaReutersDemo implements Constants {
 
 		System.setProperty("DKPRO_HOME", "target/" + MekaReutersDemo.class.getSimpleName());
 
-		ExperimentTrainTest batch = new ExperimentTrainTest(EXPERIMENT_NAME + "-TrainTest",
-				MekaClassificationAdapter.class);
+		ExperimentTrainTest batch = new ExperimentTrainTest(EXPERIMENT_NAME + "-TrainTest");
 		batch.setPreprocessing(getPreprocessing());
 		batch.setParameterSpace(pSpace);
 		batch.addReport(ContextMemoryReport.class);
