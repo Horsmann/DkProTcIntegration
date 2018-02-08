@@ -105,7 +105,7 @@ public class LibsvmNewsgroupsDemo
 
         Dimension<List<Object>> dimClassificationArgs = Dimension
                 .create(Constants.DIM_CLASSIFICATION_ARGS, asList(new Object[] { new LibsvmAdapter(), "-s",
-                        LibsvmAdapter.PARAM_SVM_TYPE_C_SVC_MULTI_CLASS, "-c", "10000", }));
+                        "0", "-c", "10000", }));
 
         Dimension<TcFeatureSet> dimFeatureSets = Dimension.create(DIM_FEATURE_SET, new TcFeatureSet(
                 TcFeatureFactory.create(NrOfTokensPerSentence.class),

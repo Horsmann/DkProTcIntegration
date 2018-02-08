@@ -56,7 +56,7 @@ public class ContextMemoryReport
 				return;
 			}
 			if (TcTaskTypeUtil.isCrossValidationTask(storageService, id)) {
-				id2outcome = storageService.locateKey(id, Constants.COMBINED_ID_OUTCOME_KEY);
+				id2outcome = storageService.locateKey(id, Constants.FILE_COMBINED_ID_OUTCOME_KEY);
 				return;
 			}
 		}
