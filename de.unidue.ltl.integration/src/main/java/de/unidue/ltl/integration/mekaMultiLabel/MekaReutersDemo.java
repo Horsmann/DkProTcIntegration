@@ -36,9 +36,9 @@ import org.dkpro.lab.task.ParameterSpace;
 import org.dkpro.tc.api.features.TcFeatureFactory;
 import org.dkpro.tc.api.features.TcFeatureSet;
 import org.dkpro.tc.core.Constants;
-import org.dkpro.tc.features.length.NrOfTokens;
-import org.dkpro.tc.features.ngram.LuceneNGram;
-import org.dkpro.tc.features.ngram.LucenePOSNGram;
+import org.dkpro.tc.features.ngram.NumberOfTokensRatio;
+import org.dkpro.tc.features.ngram.PosNGram;
+import org.dkpro.tc.features.ngram.WordNGram;
 import org.dkpro.tc.ml.ExperimentTrainTest;
 import org.dkpro.tc.ml.report.BatchTrainTestReport;
 import org.dkpro.tc.ml.weka.MekaAdapter;
@@ -86,10 +86,10 @@ public class MekaReutersDemo implements Constants {
 				Arrays.asList(new Object[] { new MekaAdapter(), BPNN.class.getName() }));
 
 		Dimension<TcFeatureSet> dimFeatureSets = Dimension.create(DIM_FEATURE_SET,
-				new TcFeatureSet(TcFeatureFactory.create(NrOfTokens.class),
-						TcFeatureFactory.create(LuceneNGram.class, LuceneNGram.PARAM_NGRAM_USE_TOP_K, "1000",
-								LuceneNGram.PARAM_NGRAM_MIN_N, 1, LuceneNGram.PARAM_NGRAM_MAX_N, 3),
-				TcFeatureFactory.create(LucenePOSNGram.class)));
+				new TcFeatureSet(TcFeatureFactory.create(NumberOfTokensRatio.class),
+						TcFeatureFactory.create(WordNGram.class, WordNGram.PARAM_NGRAM_USE_TOP_K, "1000",
+								WordNGram.PARAM_NGRAM_MIN_N, 1, WordNGram.PARAM_NGRAM_MAX_N, 3),
+				TcFeatureFactory.create(PosNGram.class)));
 
 		Map<String, Object> dimFeatureSelection = new HashMap<String, Object>();
 		dimFeatureSelection.put(DIM_LABEL_TRANSFORMATION_METHOD, "BinaryRelevanceAttributeEvaluator");

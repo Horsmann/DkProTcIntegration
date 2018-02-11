@@ -17,9 +17,9 @@ import org.dkpro.lab.task.ParameterSpace;
 import org.dkpro.tc.api.features.TcFeatureFactory;
 import org.dkpro.tc.api.features.TcFeatureSet;
 import org.dkpro.tc.core.Constants;
-import org.dkpro.tc.features.length.NrOfSentences;
-import org.dkpro.tc.features.length.NrOfTokens;
 import org.dkpro.tc.features.length.NrOfTokensPerSentence;
+import org.dkpro.tc.features.ngram.NumberOfSentencesRatio;
+import org.dkpro.tc.features.ngram.NumberOfTokensRatio;
 import org.dkpro.tc.ml.ExperimentTrainTest;
 import org.dkpro.tc.ml.weka.WekaAdapter;
 
@@ -71,8 +71,8 @@ public class WekaRegressionDemo
                 Arrays.asList(new Object[] { new WekaAdapter(), LinearRegression.class.getName() }));
 
         Dimension<TcFeatureSet> dimFeatureSets = Dimension.create(DIM_FEATURE_SET,
-                new TcFeatureSet(TcFeatureFactory.create(NrOfTokens.class),
-                        TcFeatureFactory.create(NrOfSentences.class),
+                new TcFeatureSet(TcFeatureFactory.create(NumberOfTokensRatio.class),
+                        TcFeatureFactory.create(NumberOfSentencesRatio.class),
                 TcFeatureFactory.create(NrOfTokensPerSentence.class)));
 
         ParameterSpace pSpace = new ParameterSpace(Dimension.createBundle("readers", dimReaders),

@@ -19,9 +19,9 @@ import org.dkpro.tc.api.features.TcFeatureFactory;
 import org.dkpro.tc.api.features.TcFeatureSet;
 import org.dkpro.tc.core.Constants;
 import org.dkpro.tc.features.length.NrOfChars;
-import org.dkpro.tc.features.ngram.LuceneCharacterNGram;
+import org.dkpro.tc.features.ngram.CharacterNGram;
 import org.dkpro.tc.ml.ExperimentTrainTest;
-import org.dkpro.tc.ml.crfsuite.CRFSuiteAdapter;
+import org.dkpro.tc.ml.crfsuite.CrfSuiteAdapter;
 
 import de.tudarmstadt.ukp.dkpro.core.io.tei.TeiReader;
 import de.unidue.ltl.integration.ContextMemoryReport;
@@ -45,8 +45,8 @@ public class PosTagging
 
         @SuppressWarnings("unchecked")
         ParameterSpace pSpace = getParameterSpace(Constants.FM_SEQUENCE, Constants.LM_SINGLE_LABEL,
-                Dimension.create(Constants.DIM_CLASSIFICATION_ARGS, Arrays.asList( new CRFSuiteAdapter(), 
-                        CRFSuiteAdapter.ALGORITHM_ADAPTIVE_REGULARIZATION_OF_WEIGHT_VECTOR
+                Dimension.create(Constants.DIM_CLASSIFICATION_ARGS, Arrays.asList( new CrfSuiteAdapter(), 
+                        CrfSuiteAdapter.ALGORITHM_ADAPTIVE_REGULARIZATION_OF_WEIGHT_VECTOR
 //                        , "-p", "max_iterations=50"
                         )),
                 null);
@@ -74,22 +74,22 @@ public class PosTagging
 
         Dimension<TcFeatureSet> dimFeatureSets = Dimension.create(Constants.DIM_FEATURE_SET,
                 new TcFeatureSet(TcFeatureFactory.create(NrOfChars.class),
-                        TcFeatureFactory.create(LuceneCharacterNGram.class,
-                                LuceneCharacterNGram.PARAM_NGRAM_MIN_N, 1,
-                                LuceneCharacterNGram.PARAM_NGRAM_MAX_N, 1,
-                                LuceneCharacterNGram.PARAM_NGRAM_USE_TOP_K, 50),
-                        TcFeatureFactory.create(LuceneCharacterNGram.class,
-                                LuceneCharacterNGram.PARAM_NGRAM_MIN_N, 2,
-                                LuceneCharacterNGram.PARAM_NGRAM_MAX_N, 2,
-                                LuceneCharacterNGram.PARAM_NGRAM_USE_TOP_K, 750),
-                        TcFeatureFactory.create(LuceneCharacterNGram.class,
-                                LuceneCharacterNGram.PARAM_NGRAM_MIN_N, 3,
-                                LuceneCharacterNGram.PARAM_NGRAM_MAX_N, 3,
-                                LuceneCharacterNGram.PARAM_NGRAM_USE_TOP_K, 750),
-                        TcFeatureFactory.create(LuceneCharacterNGram.class,
-                                LuceneCharacterNGram.PARAM_NGRAM_MIN_N, 4,
-                                LuceneCharacterNGram.PARAM_NGRAM_MAX_N, 4,
-                                LuceneCharacterNGram.PARAM_NGRAM_USE_TOP_K, 750)
+                        TcFeatureFactory.create(CharacterNGram.class,
+                                CharacterNGram.PARAM_NGRAM_MIN_N, 1,
+                                CharacterNGram.PARAM_NGRAM_MAX_N, 1,
+                                CharacterNGram.PARAM_NGRAM_USE_TOP_K, 50),
+                        TcFeatureFactory.create(CharacterNGram.class,
+                                CharacterNGram.PARAM_NGRAM_MIN_N, 2,
+                                CharacterNGram.PARAM_NGRAM_MAX_N, 2,
+                                CharacterNGram.PARAM_NGRAM_USE_TOP_K, 750),
+                        TcFeatureFactory.create(CharacterNGram.class,
+                                CharacterNGram.PARAM_NGRAM_MIN_N, 3,
+                                CharacterNGram.PARAM_NGRAM_MAX_N, 3,
+                                CharacterNGram.PARAM_NGRAM_USE_TOP_K, 750),
+                        TcFeatureFactory.create(CharacterNGram.class,
+                                CharacterNGram.PARAM_NGRAM_MIN_N, 4,
+                                CharacterNGram.PARAM_NGRAM_MAX_N, 4,
+                                CharacterNGram.PARAM_NGRAM_USE_TOP_K, 750)
                         ));
 
         ParameterSpace pSpace = new ParameterSpace(Dimension.createBundle("readers", dimReaders),
