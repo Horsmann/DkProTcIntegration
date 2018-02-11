@@ -105,12 +105,12 @@ public class LibsvmNewsgroupsDemo
 
         Dimension<List<Object>> dimClassificationArgs = Dimension
                 .create(Constants.DIM_CLASSIFICATION_ARGS, asList(new Object[] { new LibsvmAdapter(), "-s",
-                        "0", "-c", "10000", }));
+                        "0", "-c", "100", "-t", "1" }));
 
         Dimension<TcFeatureSet> dimFeatureSets = Dimension.create(DIM_FEATURE_SET, new TcFeatureSet(
                 TcFeatureFactory.create(NrOfTokensPerSentence.class),
                 TcFeatureFactory.create(NumberOfTokensRatio.class),
-                TcFeatureFactory.create(WordNGram.class, WordNGram.PARAM_NGRAM_USE_TOP_K, 2500,
+                TcFeatureFactory.create(WordNGram.class, WordNGram.PARAM_NGRAM_USE_TOP_K, 1500,
                         WordNGram.PARAM_NGRAM_MIN_N, 1, WordNGram.PARAM_NGRAM_MAX_N, 3)));
 
         ParameterSpace pSpace = new ParameterSpace(Dimension.createBundle("readers", dimReaders),
