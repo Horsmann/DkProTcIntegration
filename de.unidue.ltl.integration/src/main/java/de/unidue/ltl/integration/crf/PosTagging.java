@@ -18,7 +18,7 @@ import org.dkpro.lab.task.ParameterSpace;
 import org.dkpro.tc.api.features.TcFeatureFactory;
 import org.dkpro.tc.api.features.TcFeatureSet;
 import org.dkpro.tc.core.Constants;
-import org.dkpro.tc.features.length.NrOfChars;
+import org.dkpro.tc.features.maxnormalization.AvgTokenLengthRatioPerDocument;
 import org.dkpro.tc.features.ngram.CharacterNGram;
 import org.dkpro.tc.ml.ExperimentTrainTest;
 import org.dkpro.tc.ml.crfsuite.CrfSuiteAdapter;
@@ -73,7 +73,7 @@ public class PosTagging
         dimReaders.put(Constants.DIM_READER_TEST, test);
 
         Dimension<TcFeatureSet> dimFeatureSets = Dimension.create(Constants.DIM_FEATURE_SET,
-                new TcFeatureSet(TcFeatureFactory.create(NrOfChars.class),
+                new TcFeatureSet(TcFeatureFactory.create(AvgTokenLengthRatioPerDocument.class),
                         TcFeatureFactory.create(CharacterNGram.class,
                                 CharacterNGram.PARAM_NGRAM_MIN_N, 1,
                                 CharacterNGram.PARAM_NGRAM_MAX_N, 1,

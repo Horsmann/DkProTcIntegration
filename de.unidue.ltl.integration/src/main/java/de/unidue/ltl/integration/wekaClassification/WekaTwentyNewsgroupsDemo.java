@@ -35,8 +35,8 @@ import org.dkpro.lab.task.ParameterSpace;
 import org.dkpro.tc.api.features.TcFeatureFactory;
 import org.dkpro.tc.api.features.TcFeatureSet;
 import org.dkpro.tc.core.Constants;
-import org.dkpro.tc.features.length.NrOfTokensPerSentence;
-import org.dkpro.tc.features.ngram.NumberOfTokensRatio;
+import org.dkpro.tc.features.maxnormalization.AvgTokenRatioPerDocument;
+import org.dkpro.tc.features.maxnormalization.AvgTokenRatioPerSentence;
 import org.dkpro.tc.features.ngram.WordNGram;
 import org.dkpro.tc.io.FolderwiseDataReader;
 import org.dkpro.tc.ml.ExperimentTrainTest;
@@ -110,8 +110,8 @@ public class WekaTwentyNewsgroupsDemo
                         PolyKernel.class.getName() + " " + "-C -1 -E 2" }));
 
         Dimension<TcFeatureSet> dimFeatureSets = Dimension.create(DIM_FEATURE_SET, new TcFeatureSet(
-                TcFeatureFactory.create(NrOfTokensPerSentence.class),
-                TcFeatureFactory.create(NumberOfTokensRatio.class),
+                TcFeatureFactory.create(AvgTokenRatioPerDocument.class),
+                TcFeatureFactory.create(AvgTokenRatioPerSentence.class),
                 TcFeatureFactory.create(WordNGram.class, WordNGram.PARAM_NGRAM_USE_TOP_K, 1500,
                         WordNGram.PARAM_NGRAM_MIN_N, 1, WordNGram.PARAM_NGRAM_MAX_N, 3)));
 
