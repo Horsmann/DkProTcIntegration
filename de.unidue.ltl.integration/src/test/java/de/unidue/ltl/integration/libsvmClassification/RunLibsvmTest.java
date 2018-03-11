@@ -22,6 +22,6 @@ public class RunLibsvmTest
         EvaluationData<String> d = Tc2LtlabEvalConverter.convertSingleLabelModeId2Outcome(ContextMemoryReport.id2outcome);
         Accuracy<String> a = new Accuracy<>(d);
         
-        assertEquals(0.599622, a.getResult(), 0.01);
+        assertEquals(0.61, a.getResult(), 0.01);
     }
 }
