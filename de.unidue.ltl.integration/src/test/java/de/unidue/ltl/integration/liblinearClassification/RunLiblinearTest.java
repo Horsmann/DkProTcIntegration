@@ -23,5 +23,6 @@ public class RunLiblinearTest
         Accuracy<String> a = new Accuracy<>(d);
         
         assertEquals(0.79414, a.getResult(), 0.01);
+        System.err.println(a.getResult());
     }
 }
