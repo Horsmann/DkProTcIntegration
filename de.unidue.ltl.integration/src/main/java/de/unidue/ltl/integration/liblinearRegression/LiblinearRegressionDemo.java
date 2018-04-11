@@ -2,9 +2,7 @@ package de.unidue.ltl.integration.liblinearRegression;
 
 import static org.apache.uima.fit.factory.AnalysisEngineFactory.createEngineDescription;
 
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.uima.analysis_engine.AnalysisEngineDescription;
@@ -17,9 +15,8 @@ import org.dkpro.lab.task.ParameterSpace;
 import org.dkpro.tc.api.features.TcFeatureFactory;
 import org.dkpro.tc.api.features.TcFeatureSet;
 import org.dkpro.tc.core.Constants;
-import org.dkpro.tc.features.maxnormalization.AvgSentenceRatioPerDocument;
-import org.dkpro.tc.features.maxnormalization.AvgTokenLengthRatioPerDocument;
-import org.dkpro.tc.features.maxnormalization.AvgTokenRatioPerDocument;
+import org.dkpro.tc.features.maxnormalization.SentenceRatioPerDocument;
+import org.dkpro.tc.features.maxnormalization.TokenRatioPerDocument;
 import org.dkpro.tc.ml.ExperimentTrainTest;
 import org.dkpro.tc.ml.liblinear.LiblinearAdapter;
 
@@ -47,7 +44,6 @@ public class LiblinearRegressionDemo
         experiment.runTrainTest(pSpace);
     }
 
-    @SuppressWarnings("unchecked")
     public static ParameterSpace getParameterSpace()
         throws ResourceInitializationException
     {
@@ -66,19 +62,23 @@ public class LiblinearRegressionDemo
                 EssayScoreReader.class, EssayScoreReader.PARAM_SOURCE_LOCATION,
                 "src/main/resources/essays/test.txt", EssayScoreReader.PARAM_LANGUAGE, "en");
         dimReaders.put(DIM_READER_TEST, readerTest);
+        
 
-        Dimension<List<Object>> dimClassificationArgs = Dimension.create(DIM_CLASSIFICATION_ARGS,
-                Arrays.asList(new Object[] { new LiblinearAdapter(), "-s", "6" }));
+        Map<String, Object> config = new HashMap<>();
+        config.put(DIM_CLASSIFICATION_ARGS, new Object[] { new LiblinearAdapter(),  "-s", "6" });
+        config.put(DIM_DATA_WRITER, new LiblinearAdapter().getDataWriterClass().getName());
+        config.put(DIM_FEATURE_USE_SPARSE, new LiblinearAdapter().useSparseFeatures());
+        
+        Dimension<Map<String, Object>> mlas = Dimension.createBundle("config", config);
 
         Dimension<TcFeatureSet> dimFeatureSets = Dimension.create(DIM_FEATURE_SET,
-                new TcFeatureSet(TcFeatureFactory.create(AvgTokenRatioPerDocument.class),
-                        TcFeatureFactory.create(AvgTokenLengthRatioPerDocument.class),
-                        TcFeatureFactory.create(AvgSentenceRatioPerDocument.class)));
+                new TcFeatureSet(TcFeatureFactory.create(TokenRatioPerDocument.class),
+                        TcFeatureFactory.create(SentenceRatioPerDocument.class)));
 
         ParameterSpace pSpace = new ParameterSpace(Dimension.createBundle("readers", dimReaders),
                 Dimension.create(DIM_LEARNING_MODE, LM_REGRESSION),
                 Dimension.create(DIM_FEATURE_MODE, FM_DOCUMENT), dimFeatureSets,
-                dimClassificationArgs);
+                mlas);
 
         return pSpace;
     }

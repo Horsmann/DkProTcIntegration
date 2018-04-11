@@ -18,9 +18,7 @@
  */
 package de.unidue.ltl.integration.wekaClassification;
 
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.uima.analysis_engine.AnalysisEngineDescription;
@@ -35,8 +33,7 @@ import org.dkpro.lab.task.ParameterSpace;
 import org.dkpro.tc.api.features.TcFeatureFactory;
 import org.dkpro.tc.api.features.TcFeatureSet;
 import org.dkpro.tc.core.Constants;
-import org.dkpro.tc.features.maxnormalization.AvgTokenRatioPerDocument;
-import org.dkpro.tc.features.maxnormalization.AvgTokenRatioPerSentence;
+import org.dkpro.tc.features.maxnormalization.TokenRatioPerDocument;
 import org.dkpro.tc.features.ngram.WordNGram;
 import org.dkpro.tc.io.FolderwiseDataReader;
 import org.dkpro.tc.ml.ExperimentTrainTest;
@@ -83,7 +80,6 @@ public class WekaTwentyNewsgroupsDemo
         experiment.runTrainTest(pSpace);
     }
 
-    @SuppressWarnings("unchecked")
     public static ParameterSpace getParameterSpace()
         throws ResourceInitializationException
     {
@@ -105,20 +101,25 @@ public class WekaTwentyNewsgroupsDemo
                 FolderwiseDataReader.PARAM_PATTERNS, "/**/*.txt");
         dimReaders.put(DIM_READER_TEST, readerTest);
 
-        Dimension<List<Object>> dimClassificationArgs = Dimension.create(DIM_CLASSIFICATION_ARGS,
-                Arrays.asList(new Object[] {  new WekaAdapter(), SMO.class.getName(), "-C", "1.0", "-K",
-                        PolyKernel.class.getName() + " " + "-C -1 -E 2" }));
+        
+        Map<String, Object> config = new HashMap<>();
+        config.put(DIM_CLASSIFICATION_ARGS,
+                new Object[] {  new WekaAdapter(), SMO.class.getName(), "-C", "1.0", "-K",
+                        PolyKernel.class.getName() + " " + "-C -1 -E 2" });
+        config.put(DIM_DATA_WRITER, new WekaAdapter().getDataWriterClass().getName());
+        config.put(DIM_FEATURE_USE_SPARSE, new WekaAdapter().useSparseFeatures());
 
+        Dimension<Map<String, Object>> mlas = Dimension.createBundle("config", config);
+        
         Dimension<TcFeatureSet> dimFeatureSets = Dimension.create(DIM_FEATURE_SET, new TcFeatureSet(
-                TcFeatureFactory.create(AvgTokenRatioPerDocument.class),
-                TcFeatureFactory.create(AvgTokenRatioPerSentence.class),
+                TcFeatureFactory.create(TokenRatioPerDocument.class),
                 TcFeatureFactory.create(WordNGram.class, WordNGram.PARAM_NGRAM_USE_TOP_K, 1500,
                         WordNGram.PARAM_NGRAM_MIN_N, 1, WordNGram.PARAM_NGRAM_MAX_N, 3)));
 
         ParameterSpace pSpace = new ParameterSpace(Dimension.createBundle("readers", dimReaders),
                 Dimension.create(DIM_LEARNING_MODE, LM_SINGLE_LABEL),
                 Dimension.create(DIM_FEATURE_MODE, FM_DOCUMENT), dimFeatureSets,
-                dimClassificationArgs);
+                mlas);
 
         return pSpace;
     }

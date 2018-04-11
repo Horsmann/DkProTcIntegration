@@ -2,9 +2,7 @@ package de.unidue.ltl.integration.wekaRegression;
 
 import static org.apache.uima.fit.factory.AnalysisEngineFactory.createEngineDescription;
 
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.uima.analysis_engine.AnalysisEngineDescription;
@@ -17,9 +15,8 @@ import org.dkpro.lab.task.ParameterSpace;
 import org.dkpro.tc.api.features.TcFeatureFactory;
 import org.dkpro.tc.api.features.TcFeatureSet;
 import org.dkpro.tc.core.Constants;
-import org.dkpro.tc.features.maxnormalization.AvgSentenceRatioPerDocument;
-import org.dkpro.tc.features.maxnormalization.AvgTokenLengthRatioPerDocument;
-import org.dkpro.tc.features.maxnormalization.AvgTokenRatioPerDocument;
+import org.dkpro.tc.features.maxnormalization.SentenceRatioPerDocument;
+import org.dkpro.tc.features.maxnormalization.TokenRatioPerDocument;
 import org.dkpro.tc.ml.ExperimentTrainTest;
 import org.dkpro.tc.ml.weka.WekaAdapter;
 
@@ -31,14 +28,12 @@ public class WekaRegressionDemo
     implements Constants
 {
 
-    public static void main(String[] args)
-        throws Exception
+    public static void main(String[] args) throws Exception
     {
         new WekaRegressionDemo().run();
     }
 
-    public void run()
-        throws Exception
+    public void run() throws Exception
     {
         System.setProperty("DKPRO_HOME", "target/" + WekaRegressionDemo.class.getSimpleName());
         ParameterSpace pSpace = getParameterSpace();
@@ -48,8 +43,7 @@ public class WekaRegressionDemo
     }
 
     @SuppressWarnings("unchecked")
-    public static ParameterSpace getParameterSpace()
-        throws ResourceInitializationException
+    public static ParameterSpace getParameterSpace() throws ResourceInitializationException
     {
         // configure training and test data reader dimension
         // train/test will use both, while cross-validation will only use the train part
@@ -67,25 +61,27 @@ public class WekaRegressionDemo
                 "src/main/resources/essays/test.txt", EssayScoreReader.PARAM_LANGUAGE, "en");
         dimReaders.put(DIM_READER_TEST, readerTest);
 
-        Dimension<List<Object>> dimClassificationArgs = Dimension.create(DIM_CLASSIFICATION_ARGS,
-                Arrays.asList(new Object[] { new WekaAdapter(), LinearRegression.class.getName() }));
+        Map<String, Object> config = new HashMap<>();
+        config.put(DIM_CLASSIFICATION_ARGS,
+                new Object[] { new WekaAdapter(), LinearRegression.class.getName() });
+        config.put(DIM_DATA_WRITER, new WekaAdapter().getDataWriterClass().getName());
+        config.put(DIM_FEATURE_USE_SPARSE, new WekaAdapter().useSparseFeatures());
+
+        Dimension<Map<String, Object>> mlas = Dimension.createBundle("config", config);
 
         Dimension<TcFeatureSet> dimFeatureSets = Dimension.create(DIM_FEATURE_SET,
-                new TcFeatureSet(TcFeatureFactory.create(AvgTokenRatioPerDocument.class),
-                        TcFeatureFactory.create(AvgTokenLengthRatioPerDocument.class),
-                        TcFeatureFactory.create(AvgSentenceRatioPerDocument.class)));
+                new TcFeatureSet(TcFeatureFactory.create(TokenRatioPerDocument.class),
+                        TcFeatureFactory.create(SentenceRatioPerDocument.class)));
 
         ParameterSpace pSpace = new ParameterSpace(Dimension.createBundle("readers", dimReaders),
                 Dimension.create(DIM_LEARNING_MODE, LM_REGRESSION),
-                Dimension.create(DIM_FEATURE_MODE, FM_DOCUMENT), dimFeatureSets,
-                dimClassificationArgs);
+                Dimension.create(DIM_FEATURE_MODE, FM_DOCUMENT), dimFeatureSets, mlas);
 
         return pSpace;
     }
 
     // ##### TRAIN-TEST #####
-    protected void runTrainTest(ParameterSpace pSpace)
-        throws Exception
+    protected void runTrainTest(ParameterSpace pSpace) throws Exception
     {
         ExperimentTrainTest batch = new ExperimentTrainTest("WekaRegressionDemo");
         batch.setPreprocessing(getPreprocessing());
@@ -96,8 +92,7 @@ public class WekaRegressionDemo
         Lab.getInstance().run(batch);
     }
 
-    protected AnalysisEngineDescription getPreprocessing()
-        throws ResourceInitializationException
+    protected AnalysisEngineDescription getPreprocessing() throws ResourceInitializationException
     {
         return createEngineDescription(createEngineDescription(BreakIteratorSegmenter.class));
     }

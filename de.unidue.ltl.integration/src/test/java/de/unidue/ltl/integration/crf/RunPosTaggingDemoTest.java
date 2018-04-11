@@ -2,7 +2,6 @@ package de.unidue.ltl.integration.crf;
 
 import static org.junit.Assert.assertEquals;
 
-import org.dkpro.tc.ml.crfsuite.task.CrfSuiteTestTask;
 import org.dkpro.tc.ml.report.util.Tc2LtlabEvalConverter;
 import org.junit.Test;
 
@@ -16,7 +15,6 @@ public class RunPosTaggingDemoTest
     public void run()
         throws Exception
     {
-        ContextMemoryReport.key = CrfSuiteTestTask.class.getName();
         new PosTagging().run();
         
         EvaluationData<String> d = Tc2LtlabEvalConverter.convertSingleLabelModeId2Outcome(ContextMemoryReport.id2outcome);

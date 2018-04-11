@@ -36,9 +36,8 @@ import org.dkpro.lab.task.ParameterSpace;
 import org.dkpro.tc.api.features.TcFeatureFactory;
 import org.dkpro.tc.api.features.TcFeatureSet;
 import org.dkpro.tc.core.Constants;
-import org.dkpro.tc.features.maxnormalization.AvgSentenceRatioPerDocument;
-import org.dkpro.tc.features.maxnormalization.AvgTokenLengthRatioPerDocument;
-import org.dkpro.tc.features.maxnormalization.AvgTokenRatioPerDocument;
+import org.dkpro.tc.features.maxnormalization.SentenceRatioPerDocument;
+import org.dkpro.tc.features.maxnormalization.TokenRatioPerDocument;
 import org.dkpro.tc.features.ngram.WordNGram;
 import org.dkpro.tc.io.FolderwiseDataReader;
 import org.dkpro.tc.ml.ExperimentTrainTest;
@@ -65,14 +64,12 @@ public class LibsvmNewsgroupsDemo
     public static final String corpusFilePathTrain = "src/main/resources/20newsgroup/train";
     public static final String corpusFilePathTest = "src/main/resources/20newsgroup/test";
 
-    public static void main(String[] args)
-        throws Exception
+    public static void main(String[] args) throws Exception
     {
         new LibsvmNewsgroupsDemo().run();
     }
 
-    public void run()
-        throws Exception
+    public void run() throws Exception
     {
         System.setProperty("DKPRO_HOME", "target/" + LibsvmNewsgroupsDemo.class.getSimpleName());
         ParameterSpace pSpace = getParameterSpace();
@@ -83,48 +80,47 @@ public class LibsvmNewsgroupsDemo
     }
 
     @SuppressWarnings("unchecked")
-    public static ParameterSpace getParameterSpace()
-        throws ResourceInitializationException
+    public static ParameterSpace getParameterSpace() throws ResourceInitializationException
     {
         // configure training and test data reader dimension
         // train/test will use both, while cross-validation will only use the train part
         Map<String, Object> dimReaders = new HashMap<String, Object>();
 
         CollectionReaderDescription readerTrain = CollectionReaderFactory.createReaderDescription(
-        		FolderwiseDataReader.class,
-        		FolderwiseDataReader.PARAM_SOURCE_LOCATION, corpusFilePathTrain,
-        		FolderwiseDataReader.PARAM_LANGUAGE, LANGUAGE_CODE,
-        		FolderwiseDataReader.PARAM_PATTERNS, "/**/*.txt");
+                FolderwiseDataReader.class, FolderwiseDataReader.PARAM_SOURCE_LOCATION,
+                corpusFilePathTrain, FolderwiseDataReader.PARAM_LANGUAGE, LANGUAGE_CODE,
+                FolderwiseDataReader.PARAM_PATTERNS, "/**/*.txt");
         dimReaders.put(DIM_READER_TRAIN, readerTrain);
 
         CollectionReaderDescription readerTest = CollectionReaderFactory.createReaderDescription(
-        		FolderwiseDataReader.class,
-        		FolderwiseDataReader.PARAM_SOURCE_LOCATION, corpusFilePathTest,
-                FolderwiseDataReader.PARAM_LANGUAGE, LANGUAGE_CODE,
+                FolderwiseDataReader.class, FolderwiseDataReader.PARAM_SOURCE_LOCATION,
+                corpusFilePathTest, FolderwiseDataReader.PARAM_LANGUAGE, LANGUAGE_CODE,
                 FolderwiseDataReader.PARAM_PATTERNS, "/**/*.txt");
         dimReaders.put(DIM_READER_TEST, readerTest);
 
-        Dimension<List<Object>> dimClassificationArgs = Dimension
-                .create(Constants.DIM_CLASSIFICATION_ARGS, asList(new Object[] { new LibsvmAdapter(), "-s",
-                        "0", "-c", "100", "-t", "1" }));
+        Map<String, Object> config = new HashMap<>();
+        config.put(DIM_CLASSIFICATION_ARGS,
+                new Object[] { new LibsvmAdapter(), "-s", "0", "-c", "100", "-t", "1" });
+        config.put(DIM_DATA_WRITER, new LibsvmAdapter().getDataWriterClass().getName());
+        config.put(DIM_FEATURE_USE_SPARSE, new LibsvmAdapter().useSparseFeatures());
 
-        Dimension<TcFeatureSet> dimFeatureSets = Dimension.create(DIM_FEATURE_SET, new TcFeatureSet(
-        		TcFeatureFactory.create(AvgTokenRatioPerDocument.class),
-                TcFeatureFactory.create(AvgTokenLengthRatioPerDocument.class),
-                TcFeatureFactory.create(AvgSentenceRatioPerDocument.class),
-                TcFeatureFactory.create(WordNGram.class, WordNGram.PARAM_NGRAM_USE_TOP_K, 1500,
-                        WordNGram.PARAM_NGRAM_MIN_N, 1, WordNGram.PARAM_NGRAM_MAX_N, 3)));
+        Dimension<Map<String, Object>> mlas = Dimension.createBundle("config", config);
+
+        Dimension<TcFeatureSet> dimFeatureSets = Dimension.create(DIM_FEATURE_SET,
+                new TcFeatureSet(TcFeatureFactory.create(TokenRatioPerDocument.class),
+                        TcFeatureFactory.create(SentenceRatioPerDocument.class),
+                        TcFeatureFactory.create(WordNGram.class, WordNGram.PARAM_NGRAM_USE_TOP_K,
+                                1500, WordNGram.PARAM_NGRAM_MIN_N, 1, WordNGram.PARAM_NGRAM_MAX_N,
+                                3)));
 
         ParameterSpace pSpace = new ParameterSpace(Dimension.createBundle("readers", dimReaders),
                 Dimension.create(DIM_LEARNING_MODE, LM_SINGLE_LABEL),
-                Dimension.create(DIM_FEATURE_MODE, FM_DOCUMENT), dimFeatureSets,
-                dimClassificationArgs);
+                Dimension.create(DIM_FEATURE_MODE, FM_DOCUMENT), dimFeatureSets, mlas);
 
         return pSpace;
     }
 
-    protected void runTrainTest(ParameterSpace pSpace)
-        throws Exception
+    protected void runTrainTest(ParameterSpace pSpace) throws Exception
     {
 
         ExperimentTrainTest batch = new ExperimentTrainTest("LibsvmTwentyNewsgroupsTrainTest");
@@ -138,8 +134,7 @@ public class LibsvmNewsgroupsDemo
         Lab.getInstance().run(batch);
     }
 
-    protected AnalysisEngineDescription getPreprocessing()
-        throws ResourceInitializationException
+    protected AnalysisEngineDescription getPreprocessing() throws ResourceInitializationException
     {
 
         return AnalysisEngineFactory.createEngineDescription(BreakIteratorSegmenter.class);

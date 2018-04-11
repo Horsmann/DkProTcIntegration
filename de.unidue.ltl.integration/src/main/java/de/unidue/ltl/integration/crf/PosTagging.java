@@ -2,7 +2,6 @@ package de.unidue.ltl.integration.crf;
 
 import static org.apache.uima.fit.factory.AnalysisEngineFactory.createEngineDescription;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,7 +17,7 @@ import org.dkpro.lab.task.ParameterSpace;
 import org.dkpro.tc.api.features.TcFeatureFactory;
 import org.dkpro.tc.api.features.TcFeatureSet;
 import org.dkpro.tc.core.Constants;
-import org.dkpro.tc.features.maxnormalization.AvgTokenLengthRatioPerDocument;
+import org.dkpro.tc.features.maxnormalization.TokenLengthRatio;
 import org.dkpro.tc.features.ngram.CharacterNGram;
 import org.dkpro.tc.ml.ExperimentTrainTest;
 import org.dkpro.tc.ml.crfsuite.CrfSuiteAdapter;
@@ -27,7 +26,7 @@ import de.tudarmstadt.ukp.dkpro.core.io.tei.TeiReader;
 import de.unidue.ltl.integration.ContextMemoryReport;
 import de.unidue.ltl.integration.SequenceOutcomeAnnotator;
 
-public class PosTagging
+public class PosTagging implements Constants
 {
     public static void main(String[] args)
         throws Exception
@@ -42,21 +41,23 @@ public class PosTagging
         // Ensures that people can run the experiments even if they haven't read the setup
         // instructions first :)
         System.setProperty("DKPRO_HOME", "target/" + PosTagging.class.getSimpleName());
+        
+        Map<String, Object> config = new HashMap<>();
+        config.put(DIM_CLASSIFICATION_ARGS, new Object[] { new CrfSuiteAdapter(), CrfSuiteAdapter.ALGORITHM_AVERAGED_PERCEPTRON });
+        config.put(DIM_DATA_WRITER, new CrfSuiteAdapter().getDataWriterClass().getName());
+        config.put(DIM_FEATURE_USE_SPARSE, new CrfSuiteAdapter().useSparseFeatures());
+        
+        Dimension<Map<String, Object>> mlas = Dimension.createBundle("config", config);
 
-        @SuppressWarnings("unchecked")
         ParameterSpace pSpace = getParameterSpace(Constants.FM_SEQUENCE, Constants.LM_SINGLE_LABEL,
-                Dimension.create(Constants.DIM_CLASSIFICATION_ARGS, Arrays.asList( new CrfSuiteAdapter(), 
-                        CrfSuiteAdapter.ALGORITHM_ADAPTIVE_REGULARIZATION_OF_WEIGHT_VECTOR
-//                        , "-p", "max_iterations=50"
-                        )),
-                null);
+                mlas, null);
 
         PosTagging experiment = new PosTagging();
         experiment.runTrainTest(pSpace);
     }
 
     public static ParameterSpace getParameterSpace(String featureMode, String learningMode,
-            Dimension<List<Object>> dimClassificationArgs, Dimension<List<String>> dimFilters)
+            Dimension<Map<String, Object>> mlas, Dimension<List<String>> dimFilters)
                 throws ResourceInitializationException
     {
         // configure training and test data reader dimension
@@ -73,7 +74,7 @@ public class PosTagging
         dimReaders.put(Constants.DIM_READER_TEST, test);
 
         Dimension<TcFeatureSet> dimFeatureSets = Dimension.create(Constants.DIM_FEATURE_SET,
-                new TcFeatureSet(TcFeatureFactory.create(AvgTokenLengthRatioPerDocument.class),
+                new TcFeatureSet(TcFeatureFactory.create(TokenLengthRatio.class),
                         TcFeatureFactory.create(CharacterNGram.class,
                                 CharacterNGram.PARAM_NGRAM_MIN_N, 1,
                                 CharacterNGram.PARAM_NGRAM_MAX_N, 1,
@@ -95,7 +96,7 @@ public class PosTagging
         ParameterSpace pSpace = new ParameterSpace(Dimension.createBundle("readers", dimReaders),
                 Dimension.create(Constants.DIM_LEARNING_MODE, learningMode),
                 Dimension.create(Constants.DIM_FEATURE_MODE, featureMode), dimFeatureSets,
-                dimClassificationArgs);
+                mlas);
 
         return pSpace;
     }
