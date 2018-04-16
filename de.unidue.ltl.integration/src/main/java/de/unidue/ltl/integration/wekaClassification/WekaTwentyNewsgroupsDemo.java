@@ -107,7 +107,7 @@ public class WekaTwentyNewsgroupsDemo
         config.put(DIM_CLASSIFICATION_ARGS,
                 new Object[] {  new WekaAdapter(), SMO.class.getName(), "-C", "1.0", "-K",
                         PolyKernel.class.getName() + " " + "-C -1 -E 2" });
-        config.put(DIM_DATA_WRITER, new WekaAdapter().getDataWriterClass().getName());
+        config.put(DIM_DATA_WRITER, new WekaAdapter().getDataWriterClass());
         config.put(DIM_FEATURE_USE_SPARSE, new WekaAdapter().useSparseFeatures());
 
         Dimension<Map<String, Object>> mlas = Dimension.createBundle("config", config);

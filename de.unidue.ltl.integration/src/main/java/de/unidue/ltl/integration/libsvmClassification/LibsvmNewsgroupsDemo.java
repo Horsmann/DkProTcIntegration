@@ -18,10 +18,7 @@
  */
 package de.unidue.ltl.integration.libsvmClassification;
 
-import static java.util.Arrays.asList;
-
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.uima.analysis_engine.AnalysisEngineDescription;
@@ -79,7 +76,6 @@ public class LibsvmNewsgroupsDemo
         experiment.runTrainTest(pSpace);
     }
 
-    @SuppressWarnings("unchecked")
     public static ParameterSpace getParameterSpace() throws ResourceInitializationException
     {
         // configure training and test data reader dimension
@@ -101,7 +97,7 @@ public class LibsvmNewsgroupsDemo
         Map<String, Object> config = new HashMap<>();
         config.put(DIM_CLASSIFICATION_ARGS,
                 new Object[] { new LibsvmAdapter(), "-s", "0", "-c", "100", "-t", "1" });
-        config.put(DIM_DATA_WRITER, new LibsvmAdapter().getDataWriterClass().getName());
+        config.put(DIM_DATA_WRITER, new LibsvmAdapter().getDataWriterClass());
         config.put(DIM_FEATURE_USE_SPARSE, new LibsvmAdapter().useSparseFeatures());
 
         Dimension<Map<String, Object>> mlas = Dimension.createBundle("config", config);

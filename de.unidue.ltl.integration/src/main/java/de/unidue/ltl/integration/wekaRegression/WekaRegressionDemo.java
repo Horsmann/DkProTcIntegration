@@ -42,7 +42,6 @@ public class WekaRegressionDemo
         experiment.runTrainTest(pSpace);
     }
 
-    @SuppressWarnings("unchecked")
     public static ParameterSpace getParameterSpace() throws ResourceInitializationException
     {
         // configure training and test data reader dimension
@@ -64,7 +63,7 @@ public class WekaRegressionDemo
         Map<String, Object> config = new HashMap<>();
         config.put(DIM_CLASSIFICATION_ARGS,
                 new Object[] { new WekaAdapter(), LinearRegression.class.getName() });
-        config.put(DIM_DATA_WRITER, new WekaAdapter().getDataWriterClass().getName());
+        config.put(DIM_DATA_WRITER, new WekaAdapter().getDataWriterClass());
         config.put(DIM_FEATURE_USE_SPARSE, new WekaAdapter().useSparseFeatures());
 
         Dimension<Map<String, Object>> mlas = Dimension.createBundle("config", config);
