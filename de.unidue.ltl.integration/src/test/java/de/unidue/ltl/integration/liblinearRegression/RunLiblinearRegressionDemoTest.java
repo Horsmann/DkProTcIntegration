@@ -22,6 +22,6 @@ public class RunLiblinearRegressionDemoTest
         EvaluationData<Double> d = Tc2LtlabEvalConverter.convertRegressionModeId2Outcome(ContextMemoryReport.id2outcome);
         SpearmanCorrelation a = new SpearmanCorrelation(d);
         
-        assertEquals(0.75, a.getResult(), 0.05);
+        assertEquals(0.75, a.getResult(), 0.1);
     }
 }
