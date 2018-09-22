@@ -40,7 +40,7 @@ import org.dkpro.tc.features.maxnormalization.TokenRatioPerDocument;
 import org.dkpro.tc.features.ngram.PosNGram;
 import org.dkpro.tc.features.ngram.WordNGram;
 import org.dkpro.tc.ml.ExperimentTrainTest;
-import org.dkpro.tc.ml.report.BatchTrainTestReport;
+import org.dkpro.tc.ml.report.TrainTestReport;
 import org.dkpro.tc.ml.weka.MekaAdapter;
 
 import de.tudarmstadt.ukp.dkpro.core.io.text.TextReader;
@@ -116,7 +116,7 @@ public class MekaReutersDemo implements Constants {
 		batch.setParameterSpace(pSpace);
 		batch.addReport(ContextMemoryReport.class);
 		batch.setExecutionPolicy(ExecutionPolicy.RUN_AGAIN);
-		batch.addReport(BatchTrainTestReport.class);
+		batch.addReport(TrainTestReport.class);
 
 		// Run
 		Lab.getInstance().run(batch);

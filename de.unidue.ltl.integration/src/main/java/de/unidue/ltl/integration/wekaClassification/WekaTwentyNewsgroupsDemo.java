@@ -37,8 +37,8 @@ import org.dkpro.tc.features.maxnormalization.TokenRatioPerDocument;
 import org.dkpro.tc.features.ngram.WordNGram;
 import org.dkpro.tc.io.FolderwiseDataReader;
 import org.dkpro.tc.ml.ExperimentTrainTest;
-import org.dkpro.tc.ml.report.BatchRuntimeReport;
-import org.dkpro.tc.ml.report.BatchTrainTestReport;
+import org.dkpro.tc.ml.report.RuntimeReport;
+import org.dkpro.tc.ml.report.TrainTestReport;
 import org.dkpro.tc.ml.weka.WekaAdapter;
 
 import de.tudarmstadt.ukp.dkpro.core.tokit.BreakIteratorSegmenter;
@@ -133,9 +133,9 @@ public class WekaTwentyNewsgroupsDemo
         batch.setPreprocessing(getPreprocessing());
         batch.setParameterSpace(pSpace);
         batch.setExecutionPolicy(ExecutionPolicy.RUN_AGAIN);
-        batch.addReport(BatchTrainTestReport.class);
+        batch.addReport(TrainTestReport.class);
         batch.addReport(ContextMemoryReport.class);
-        batch.addReport(BatchRuntimeReport.class);
+        batch.addReport(RuntimeReport.class);
 
         // Run
         Lab.getInstance().run(batch);
