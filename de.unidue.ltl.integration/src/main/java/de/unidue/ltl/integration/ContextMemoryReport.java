@@ -19,20 +19,19 @@
 package de.unidue.ltl.integration;
 
 import java.io.File;
-import java.util.List;
 import java.util.Set;
 
 import org.dkpro.lab.storage.StorageService;
 import org.dkpro.tc.core.Constants;
 import org.dkpro.tc.core.task.TcTaskTypeUtil;
-import org.dkpro.tc.ml.report.TcBatchReportBase;
+import org.dkpro.tc.ml.report.TcAbstractReport;
 
 /**
  * This is a slightly ugly solution for recording the DKPro Lab output folder of an experiment to
  * read result files in JUnit tests
  */
 public class ContextMemoryReport
-    extends TcBatchReportBase
+    extends TcAbstractReport
 {
 
     /**

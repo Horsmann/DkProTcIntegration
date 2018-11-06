@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see http://www.gnu.org/licenses/.
  */
-package de.unidue.ltl.integration.liblinearClassification;
+package de.unidue.ltl.integration.xgboostClassification;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -33,13 +33,13 @@ import org.dkpro.lab.task.ParameterSpace;
 import org.dkpro.tc.api.features.TcFeatureFactory;
 import org.dkpro.tc.api.features.TcFeatureSet;
 import org.dkpro.tc.core.Constants;
+import org.dkpro.tc.features.maxnormalization.SentenceRatioPerDocument;
 import org.dkpro.tc.features.maxnormalization.TokenRatioPerDocument;
 import org.dkpro.tc.features.ngram.WordNGram;
 import org.dkpro.tc.io.FolderwiseDataReader;
 import org.dkpro.tc.ml.experiment.ExperimentTrainTest;
-import org.dkpro.tc.ml.liblinear.LiblinearAdapter;
-import org.dkpro.tc.ml.report.RuntimeReport;
 import org.dkpro.tc.ml.report.TrainTestReport;
+import org.dkpro.tc.ml.xgboost.XgboostAdapter;
 
 import de.tudarmstadt.ukp.dkpro.core.tokit.BreakIteratorSegmenter;
 import de.unidue.ltl.integration.ContextMemoryReport;
@@ -53,7 +53,7 @@ import de.unidue.ltl.integration.ContextMemoryReport;
  * For these cases, the self-sufficient Groovy versions are more suitable, since their source code
  * can be changed and then executed without pre-compilation.
  */
-public class LiblinearNewsgroupsDemo
+public class XgboostNewsgroupsDemo
     implements Constants
 {
     public static final String LANGUAGE_CODE = "en";
@@ -61,82 +61,76 @@ public class LiblinearNewsgroupsDemo
     public static final String corpusFilePathTrain = "src/main/resources/20newsgroup/train";
     public static final String corpusFilePathTest = "src/main/resources/20newsgroup/test";
 
-    public static void main(String[] args)
-        throws Exception
+    public static void main(String[] args) throws Exception
     {
-        new LiblinearNewsgroupsDemo().run();
+        new XgboostNewsgroupsDemo().run();
     }
 
-    public void run()
-        throws Exception
+    public void run() throws Exception
     {
-        System.setProperty("DKPRO_HOME", "target/" + LiblinearNewsgroupsDemo.class.getSimpleName());
+        System.setProperty("DKPRO_HOME", "target/" + XgboostNewsgroupsDemo.class.getSimpleName());
         ParameterSpace pSpace = getParameterSpace();
 
-        LiblinearNewsgroupsDemo experiment = new LiblinearNewsgroupsDemo();
+        XgboostNewsgroupsDemo experiment = new XgboostNewsgroupsDemo();
         // experiment.runCrossValidation(pSpace);
         experiment.runTrainTest(pSpace);
     }
 
-    public static ParameterSpace getParameterSpace()
-        throws ResourceInitializationException
+    public static ParameterSpace getParameterSpace() throws ResourceInitializationException
     {
         // configure training and test data reader dimension
         // train/test will use both, while cross-validation will only use the train part
         Map<String, Object> dimReaders = new HashMap<String, Object>();
 
         CollectionReaderDescription readerTrain = CollectionReaderFactory.createReaderDescription(
-                FolderwiseDataReader.class,
-                FolderwiseDataReader.PARAM_SOURCE_LOCATION, corpusFilePathTrain,
-                FolderwiseDataReader.PARAM_LANGUAGE, LANGUAGE_CODE,
+                FolderwiseDataReader.class, FolderwiseDataReader.PARAM_SOURCE_LOCATION,
+                corpusFilePathTrain, FolderwiseDataReader.PARAM_LANGUAGE, LANGUAGE_CODE,
                 FolderwiseDataReader.PARAM_PATTERNS, "/**/*.txt");
         dimReaders.put(DIM_READER_TRAIN, readerTrain);
 
         CollectionReaderDescription readerTest = CollectionReaderFactory.createReaderDescription(
-                FolderwiseDataReader.class,
-                FolderwiseDataReader.PARAM_SOURCE_LOCATION, corpusFilePathTest,
-                FolderwiseDataReader.PARAM_LANGUAGE, LANGUAGE_CODE,
+                FolderwiseDataReader.class, FolderwiseDataReader.PARAM_SOURCE_LOCATION,
+                corpusFilePathTest, FolderwiseDataReader.PARAM_LANGUAGE, LANGUAGE_CODE,
                 FolderwiseDataReader.PARAM_PATTERNS, "/**/*.txt");
         dimReaders.put(DIM_READER_TEST, readerTest);
-        
+
         Map<String, Object> config = new HashMap<>();
-        config.put(DIM_CLASSIFICATION_ARGS, new Object[] { new LiblinearAdapter(), "-s", "4", "-c", "100" });
-        config.put(DIM_DATA_WRITER, new LiblinearAdapter().getDataWriterClass());
-        config.put(DIM_FEATURE_USE_SPARSE, new LiblinearAdapter().useSparseFeatures());
-        
+        config.put(DIM_CLASSIFICATION_ARGS,
+                new Object[] { new XgboostAdapter(), "objective=multi:softmax"});
+        config.put(DIM_DATA_WRITER, new XgboostAdapter().getDataWriterClass());
+        config.put(DIM_FEATURE_USE_SPARSE, new XgboostAdapter().useSparseFeatures());
+
         Dimension<Map<String, Object>> mlas = Dimension.createBundle("config", config);
 
-        Dimension<TcFeatureSet> dimFeatureSets = Dimension.create(DIM_FEATURE_SET, new TcFeatureSet(
-                TcFeatureFactory.create(TokenRatioPerDocument.class),
-                TcFeatureFactory.create(WordNGram.class, WordNGram.PARAM_NGRAM_USE_TOP_K, 2500,
-                        WordNGram.PARAM_NGRAM_MIN_N, 1, WordNGram.PARAM_NGRAM_MAX_N, 3)));
+        Dimension<TcFeatureSet> dimFeatureSets = Dimension.create(DIM_FEATURE_SET,
+                new TcFeatureSet(TcFeatureFactory.create(TokenRatioPerDocument.class),
+                        TcFeatureFactory.create(SentenceRatioPerDocument.class),
+                        TcFeatureFactory.create(WordNGram.class, WordNGram.PARAM_NGRAM_USE_TOP_K,
+                                1500, WordNGram.PARAM_NGRAM_MIN_N, 1, WordNGram.PARAM_NGRAM_MAX_N,
+                                3)));
 
         ParameterSpace pSpace = new ParameterSpace(Dimension.createBundle("readers", dimReaders),
                 Dimension.create(DIM_LEARNING_MODE, LM_SINGLE_LABEL),
-                Dimension.create(DIM_FEATURE_MODE, FM_DOCUMENT), dimFeatureSets,
-                mlas);
+                Dimension.create(DIM_FEATURE_MODE, FM_DOCUMENT), dimFeatureSets, mlas);
 
         return pSpace;
     }
 
-    protected void runTrainTest(ParameterSpace pSpace)
-        throws Exception
+    protected void runTrainTest(ParameterSpace pSpace) throws Exception
     {
 
-        ExperimentTrainTest batch = new ExperimentTrainTest("LiblinearTwentyNewsgroupsTrainTest");
+        ExperimentTrainTest batch = new ExperimentTrainTest("XgboostTwentyNewsgroupsTrainTest");
         batch.setPreprocessing(getPreprocessing());
         batch.setParameterSpace(pSpace);
         batch.setExecutionPolicy(ExecutionPolicy.RUN_AGAIN);
         batch.addReport(TrainTestReport.class);
         batch.addReport(ContextMemoryReport.class);
-        batch.addReport(RuntimeReport.class);
 
         // Run
         Lab.getInstance().run(batch);
     }
 
-    protected AnalysisEngineDescription getPreprocessing()
-        throws ResourceInitializationException
+    protected AnalysisEngineDescription getPreprocessing() throws ResourceInitializationException
     {
 
         return AnalysisEngineFactory.createEngineDescription(BreakIteratorSegmenter.class);

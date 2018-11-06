@@ -36,7 +36,7 @@ import org.dkpro.tc.core.Constants;
 import org.dkpro.tc.features.maxnormalization.TokenRatioPerDocument;
 import org.dkpro.tc.features.ngram.WordNGram;
 import org.dkpro.tc.io.FolderwiseDataReader;
-import org.dkpro.tc.ml.ExperimentTrainTest;
+import org.dkpro.tc.ml.experiment.ExperimentTrainTest;
 import org.dkpro.tc.ml.report.RuntimeReport;
 import org.dkpro.tc.ml.report.TrainTestReport;
 import org.dkpro.tc.ml.weka.WekaAdapter;

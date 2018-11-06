@@ -19,8 +19,8 @@ import org.dkpro.tc.api.features.TcFeatureSet;
 import org.dkpro.tc.core.Constants;
 import org.dkpro.tc.features.maxnormalization.TokenLengthRatio;
 import org.dkpro.tc.features.ngram.CharacterNGram;
-import org.dkpro.tc.ml.ExperimentTrainTest;
 import org.dkpro.tc.ml.crfsuite.CrfSuiteAdapter;
+import org.dkpro.tc.ml.experiment.ExperimentTrainTest;
 
 import de.tudarmstadt.ukp.dkpro.core.io.tei.TeiReader;
 import de.unidue.ltl.integration.ContextMemoryReport;
